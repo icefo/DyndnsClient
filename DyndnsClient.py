@@ -9,7 +9,7 @@ Host = 'www.ovh.com' # replace this with your dyndns' domain name
 Hostname = ['subdomain.domain.net']
 Whatsmyip = 'http://checkip.dyndns.com/', 'http://wtfismyip.com/text'
 User_Agent = "icefo's dyndns updater" # or "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
-use_https = True
+Use_Https = True
 
 myip = ''
 http_mode = '' # ssl or not
@@ -39,7 +39,7 @@ if Path_To_ConfigFile:
 		Use_Https = False
 
 
-if use_https:
+if Use_Https:
 	http_mode = 'https://'
 else:
 	http_mode = 'http://'
@@ -77,7 +77,7 @@ for x in Whatsmyip: # find the host's ip
 		if (x == Whatsmyip[-1]):
 			raise ValueError("The script wasn't able to get a valid output from the given servers. It has therefore self-terminated")
 
-
+myip = '8.8.8.8'
 
 credentials = Username + ':' + Password
 credentials = base64.standard_b64encode(bytes(credentials, "utf8"))
@@ -86,6 +86,22 @@ credentials = 'Basic ' + str(credentials)[2:-1]
 url_1 = http_mode + Host + '/nic/update?system=dyndns' + '&hostname=' + ','.join(Hostname) + '&myip=' + myip
 headers_2 = {'Host': Host, 'Authorization': credentials, 'User-Agent': User_Agent}
 
-
-print(HTTP_Client(url_1, headers_2)[0]) # /!\ no error handling and no https cert check --> use requests.get for that ?
+# The ip update happend just under this comment
+Update_Answer = HTTP_Client(url_1, headers_2)
+if (re.findall("^b'good", str(Update_Answer[0]))):
+	print("Hourra ! new ip is " + myip)
+elif (re.findall("^b'nochg", str(Update_Answer[0]))):
+	raise ValueError("The ip submitted to the server hasn't changed since last update\nThis shouldn't happen")
+elif Update_Answer[2]:
+	if (Update_Answer[2] == 401):
+		raise ValueError('Wrong credentials, HTTP error 401')
+	elif (Update_Answer[2] == 404):
+		raise ValueError('Page Not Found, HTTP error 404, probably an error in the url_1 variable')
+	else:
+		raise ValueError('HTTP Error Code ' + str(Update_Answer[2]) + ' for ' + url_1)
+elif Update_Answer[3]:
+	raise ValueError('Server unreachable (DNS, no connection ?) ' + str(Update_Answer[3]) + ' for ' + url_1)
+else:
+	raise ValueError("The script the script has encountered an unexpected error\nGood luck !")
+	
 
