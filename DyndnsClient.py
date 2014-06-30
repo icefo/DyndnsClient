@@ -84,7 +84,7 @@ credentials = base64.standard_b64encode(bytes(credentials, "utf8"))
 credentials = 'Basic ' + str(credentials)[2:-1]
 
 url_1 = http_mode + Host + '/nic/update?system=dyndns' + '&hostname=' + ','.join(Hostname) + '&myip=' + myip
-headers_2 = 'Host': Host, 'Authorization': credentials, 'User-Agent': User_Agent
+headers_2 = {'Host': Host, 'Authorization': credentials, 'User-Agent': User_Agent}
 
 # The ip update happend just under this comment
 Update_Answer = HTTP_Client(url_1, headers_2)
