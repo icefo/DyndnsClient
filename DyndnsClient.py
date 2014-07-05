@@ -34,12 +34,6 @@ if args.Path_To_ConfigFile:
 	config.read(Path_To_ConfigFile)
 	for key in config['Main']:
 		globals()[key]  = config['Main'][key]
-	Whatsmyip = Whatsmyip.split(' , ') # make Tuple
-	Hostname = Hostname.split(' , ')
-	if (Use_Https.lower() == 'true'):
-		Use_Https = True
-	else:
-		Use_Https = False
 
 
 if Use_Https:
@@ -113,7 +107,7 @@ credentials = 'Basic ' + str(credentials)[2:-1]
 
 
 # Make url and headers for the update query
-url_1 = http_mode + Host + '/nic/update?system=dyndns' + '&hostname=' + ','.join(Hostname) + '&myip=' + myip
+url_1 = http_mode + Host + '/nic/update?system=dyndns' + '&hostname=' + Hostname + '&myip=' + myip
 headers_2 = {'Host': Host, 'Authorization': credentials, 'User-Agent': User_Agent}
 
 # The ip update happend just under this comment
@@ -132,4 +126,4 @@ elif Update_Answer[2]:
 elif Update_Answer[3]:
 	raise ValueError('Server unreachable (DNS, no connection ?) ' + str(Update_Answer[3]) + ' for ' + url_1)
 else:
-	raise ValueError("The script the script has encountered an unexpected error\nGood luck !\n" + str(Update_Answer[0]))
+	raise ValueError("The script the script has encountered an unexpected error\nGood luck !\n" + str(Update_Answer[0] + '\n' + url_1))
