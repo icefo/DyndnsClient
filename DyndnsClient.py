@@ -123,5 +123,3 @@ elif Update_Answer[3]:
 	raise ValueError('Server unreachable (DNS, no connection ?) ' + str(Update_Answer[3]) + ' for ' + url_1)
 else:
 	raise ValueError("The script the script has encountered an unexpected error\nGood luck !")
-	
-
