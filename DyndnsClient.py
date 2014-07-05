@@ -10,8 +10,9 @@ Hostname = ['subdomain.domain.net']
 Whatsmyip = 'http://checkip.dyndns.com/', 'http://wtfismyip.com/text'
 User_Agent = "icefo's dyndns updater" # or "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
 Use_Https = True
-Path_To_IpFile = "{}/".format(os.path.expanduser("~")) + '.DyndnsClientIpHistory'
 
+Path_To_IpFile = "{}/".format(os.path.expanduser("~")) + '.DyndnsClientIpHistory'
+IpFile = ''
 myip = ''
 http_mode = '' # ssl or not
 credentials = '' # credentials for the ip update query
@@ -20,13 +21,14 @@ headers_1 = '' # User-Agent for Whatsmyip query
 headers_2 = '' # headers for the ip update query
 
 
+# This bloc of code is used to parse an eventual config file
 parser = argparse.ArgumentParser(description="A simple dyndns update client in python 3\nhttps://github.com/icefo/DyndnsClient for more infos")
 parser.add_argument("-ptc", "--Path_To_ConfigFile", help="You can call this script with a config file so specify the path here")
+parser.add_argument("-F", "--Force_Ip_Update", help="Force ip update", action="store_true")
 args = parser.parse_args()
 Path_To_ConfigFile = args.Path_To_ConfigFile
 
-
-if Path_To_ConfigFile:
+if args.Path_To_ConfigFile:
 	config = configparser.RawConfigParser()
 	config.optionxform = lambda option: option # option for case sensitive variable
 	config.read(Path_To_ConfigFile)
@@ -46,6 +48,7 @@ else:
 	http_mode = 'http://'
 
 
+# Function used to make HTTP requests
 def HTTP_Client(url, headers):
 	req = Request(url, None, headers)
 	try:
@@ -58,6 +61,8 @@ def HTTP_Client(url, headers):
 	else:
 		return(answer.read(),answer.info(),"","") # order : http contents, http server headers, http error, server unreachable
 
+
+# Function used to analyse the answer of the function HTTP_Client in the "find the host's ip" bloc of code
 def HTTP_Answer_Test(HTTP_Answer,server):
 	if HTTP_Answer[0]:
 		return(re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", str(HTTP_Answer[0]))[0])
@@ -67,8 +72,9 @@ def HTTP_Answer_Test(HTTP_Answer,server):
 		return('Server unreachable (DNS, no connection ?) ' + str(HTTP_Answer[3]) + ' for ' + server)
 
 
+# find the host's ip
 headers_1 = {'User-Agent': User_Agent}
-for x in Whatsmyip: # find the host's ip
+for x in Whatsmyip:
 	y = HTTP_Client(x, headers_1)
 	if (y[0] and not HTTP_Answer_Test(y, x) == ""):
 		myip = HTTP_Answer_Test(y, x)
@@ -78,31 +84,35 @@ for x in Whatsmyip: # find the host's ip
 		if (x == Whatsmyip[-1]):
 			raise ValueError("The script wasn't able to get a valid output from the given servers. It has therefore self-terminated")
 
-#myip = '8.8.8.8'
 
 #check if the ip is still the same
-
-
 if not os.path.isfile(Path_To_IpFile):
 	with open(Path_To_IpFile, 'w') as f:
 		f.write('0.0.0.0\n0.0.0.0\n0.0.0.0\n0.0.0.0\n0.0.0.0')
 
 with open(Path_To_IpFile, 'r') as f:
-	data = f.read().split('\n')[-5:]
+	IpFile = f.read().split('\n')[-5:]
 
-if (myip == data[-1]):
-	print('The ip', myip, 'hasn\'t changed since last check')
-	sys.exit(1)
+if (myip == IpFile[-1]):
+	if args.Force_Ip_Update:
+		print('You forced the', myip, 'ip update, this may raise an error')
+	else:
+		print('The ip', myip, 'hasn\'t changed since last check')
+		sys.exit(1)
 else:
-	data.extend([myip])
+	IpFile.extend([myip])
 	with open(Path_To_IpFile, 'w') as f:
-		f.write('\n'.join(data))
+		f.write('\n'.join(IpFile))
 
 
+# Transform the credentials to make them conform to the HTTP Basic Auth standard
+# The requests lib has probably a function to do that
 credentials = Username + ':' + Password
 credentials = base64.standard_b64encode(bytes(credentials, "utf8"))
 credentials = 'Basic ' + str(credentials)[2:-1]
 
+
+# Make url and headers for the update query
 url_1 = http_mode + Host + '/nic/update?system=dyndns' + '&hostname=' + ','.join(Hostname) + '&myip=' + myip
 headers_2 = {'Host': Host, 'Authorization': credentials, 'User-Agent': User_Agent}
 
@@ -122,4 +132,4 @@ elif Update_Answer[2]:
 elif Update_Answer[3]:
 	raise ValueError('Server unreachable (DNS, no connection ?) ' + str(Update_Answer[3]) + ' for ' + url_1)
 else:
-	raise ValueError("The script the script has encountered an unexpected error\nGood luck !")
+	raise ValueError("The script the script has encountered an unexpected error\nGood luck !\n" + str(Update_Answer[0]))
