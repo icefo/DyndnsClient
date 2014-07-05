@@ -1,7 +1,7 @@
 #!/bin/env python3
 from urllib.request import Request, urlopen
 from urllib.error import  URLError
-import base64, re, configparser, argparse
+import base64, re, configparser, argparse, sys, os.path
 
 Username = 'My Username'
 Password = 'My Secure Password'
@@ -10,6 +10,7 @@ Hostname = ['subdomain.domain.net']
 Whatsmyip = 'http://checkip.dyndns.com/', 'http://wtfismyip.com/text'
 User_Agent = "icefo's dyndns updater" # or "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
 Use_Https = True
+Path_To_IpFile = "{}/".format(os.path.expanduser("~")) + '.DyndnsClientIpHistory'
 
 myip = ''
 http_mode = '' # ssl or not
@@ -77,7 +78,26 @@ for x in Whatsmyip: # find the host's ip
 		if (x == Whatsmyip[-1]):
 			raise ValueError("The script wasn't able to get a valid output from the given servers. It has therefore self-terminated")
 
-myip = '8.8.8.8'
+#myip = '8.8.8.8'
+
+#check if the ip is still the same
+
+
+if not os.path.isfile(Path_To_IpFile):
+	with open(Path_To_IpFile, 'w') as f:
+		f.write('0.0.0.0\n0.0.0.0\n0.0.0.0\n0.0.0.0\n0.0.0.0')
+
+with open(Path_To_IpFile, 'r') as f:
+	data = f.read().split('\n')[-5:]
+
+if (myip == data[-1]):
+	print('The ip', myip, 'hasn\'t changed since last check')
+	sys.exit(1)
+else:
+	data.extend([myip])
+	with open(Path_To_IpFile, 'w') as f:
+		f.write('\n'.join(data))
+
 
 credentials = Username + ':' + Password
 credentials = base64.standard_b64encode(bytes(credentials, "utf8"))
