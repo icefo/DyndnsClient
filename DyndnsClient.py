@@ -32,7 +32,7 @@ if Path_To_ConfigFile:
 	config.read(Path_To_ConfigFile)
 	for key in config['Main']:
 		globals()[key]  = config['Main'][key]
-	Whatsmyip = Whatsmyip.split(' , ') # make list
+	Whatsmyip = Whatsmyip.split(' , ') # make Tuple
 	Hostname = Hostname.split(' , ')
 	if (Use_Https.lower() == 'true'):
 		Use_Https = True
