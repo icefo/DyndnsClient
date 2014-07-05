@@ -6,7 +6,7 @@ import base64, re, configparser, argparse, sys, os.path
 Username = 'My Username'
 Password = 'My Secure Password'
 Host = 'www.ovh.com' # replace this with your dyndns' domain name 
-Hostname = ['subdomain.domain.net']
+Hostname = 'subdomain.domain.net'
 Whatsmyip = 'http://checkip.dyndns.com/', 'http://wtfismyip.com/text'
 User_Agent = "icefo's dyndns updater" # or "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
 Use_Https = True
