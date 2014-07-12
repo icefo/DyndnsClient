@@ -1,6 +1,7 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 from urllib.request import Request, urlopen
 from urllib.error import  URLError
+from datetime import datetime
 import base64, re, configparser, argparse, sys, os.path
 
 Username = 'My Username'
@@ -8,7 +9,7 @@ Password = 'My Secure Password'
 Host = 'www.ovh.com' # replace this with your dyndns' domain name 
 Hostname = 'subdomain.domain.net'
 Whatsmyip = 'http://checkip.dyndns.com/', 'http://wtfismyip.com/text'
-User_Agent = "icefo's dyndns updater" # or "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
+User_Agent = "icefo's dyndns updater -- https://github.com/icefo/DyndnsClient" # or "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
 Use_Https = True
 
 Path_To_IpFile = "{}/".format(os.path.expanduser("~")) + '.DyndnsClientIpHistory'
@@ -19,9 +20,10 @@ credentials = '' # credentials for the ip update query
 url_1 = '' # url for the ip update query
 headers_1 = '' # User-Agent for Whatsmyip query
 headers_2 = '' # headers for the ip update query
+Date_now = str(datetime.now())
 
 
-# This bloc of code is used to parse an eventual config file
+# This bloc of code is used to parse an eventual config file and check if you want to force the ip update
 parser = argparse.ArgumentParser(description="A simple dyndns update client in python 3\nhttps://github.com/icefo/DyndnsClient for more infos")
 parser.add_argument("-ptc", "--Path_To_ConfigFile", help="You can call this script with a config file so specify the path here")
 parser.add_argument("-F", "--Force_Ip_Update", help="Force ip update", action="store_true")
@@ -61,9 +63,9 @@ def HTTP_Answer_Test(HTTP_Answer,server):
 	if HTTP_Answer[0]:
 		return(re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", str(HTTP_Answer[0]))[0])
 	elif HTTP_Answer[2]:
-		return('HTTP Error Code ' + str(HTTP_Answer[2]) + ' for ' + server)
+		return('HTTP Error Code ' + str(HTTP_Answer[2]) + ' for ' + server + ' -- ' + Date_now)
 	elif HTTP_Answer[3]:
-		return('Server unreachable (DNS, no connection ?) ' + str(HTTP_Answer[3]) + ' for ' + server)
+		return('Server unreachable (DNS, no connection ?) ' + str(HTTP_Answer[3]) + ' for ' + server + ' -- ' + Date_now)
 
 
 # find the host's ip
@@ -76,7 +78,7 @@ for x in Whatsmyip:
 	else:
 		print(HTTP_Answer_Test(y, x))
 		if (x == Whatsmyip[-1]):
-			raise ValueError("The script wasn't able to get a valid output from the given servers. It has therefore self-terminated")
+			raise ValueError("The script wasn't able to get a valid output from the given servers. It has therefore self-terminated" + ' -- ' + Date_now)
 
 
 #check if the ip is still the same
@@ -91,7 +93,7 @@ if (myip == IpFile[-1]):
 	if args.Force_Ip_Update:
 		print('You forced the', myip, 'ip update, this may raise an error')
 	else:
-		print('The ip', myip, 'hasn\'t changed since last check')
+		print('The ip', myip, 'hasn\'t changed since last check' + ' -- ' + Date_now)
 		sys.exit(1)
 else:
 	IpFile.extend([myip])
@@ -99,7 +101,7 @@ else:
 		f.write('\n'.join(IpFile))
 
 
-# Transform the credentials to make them conform to the HTTP Basic Auth standard
+# Transform/format the credentials to make them conform to the HTTP Basic Auth standard
 # The requests lib has probably a function to do that
 credentials = Username + ':' + Password
 credentials = base64.standard_b64encode(bytes(credentials, "utf8"))
@@ -113,17 +115,17 @@ headers_2 = {'Host': Host, 'Authorization': credentials, 'User-Agent': User_Agen
 # The ip update happend just under this comment
 Update_Answer = HTTP_Client(url_1, headers_2)
 if (re.findall("^b'good", str(Update_Answer[0]))):
-	print("Hourra ! new ip is " + myip)
+	print("Hourra ! new ip is " + myip + ' -- ' + Date_now)
 elif (re.findall("^b'nochg", str(Update_Answer[0]))):
-	raise ValueError("The ip submitted to the server hasn't changed since last update\nThis shouldn't happen")
+	raise ValueError("The ip submitted to the server hasn't changed since last update\nThis shouldn't happen" + ' -- ' + Date_now)
 elif Update_Answer[2]:
 	if (Update_Answer[2] == 401):
-		raise ValueError('Wrong credentials, HTTP error 401')
+		raise ValueError('Wrong credentials, HTTP error 401' + ' -- ' + Date_now)
 	elif (Update_Answer[2] == 404):
-		raise ValueError('Page Not Found, HTTP error 404, probably an error in the url_1 variable')
+		raise ValueError('Page Not Found, HTTP error 404, probably an error in the url_1 variable' + ' -- ' + Date_now)
 	else:
-		raise ValueError('HTTP Error Code ' + str(Update_Answer[2]) + ' for ' + url_1)
+		raise ValueError('HTTP Error Code ' + str(Update_Answer[2]) + ' for ' + url_1 + ' -- ' + Date_now)
 elif Update_Answer[3]:
-	raise ValueError('Server unreachable (DNS, no connection ?) ' + str(Update_Answer[3]) + ' for ' + url_1)
+	raise ValueError('Server unreachable (DNS, no connection ?) ' + str(Update_Answer[3]) + ' for ' + url_1 + ' -- ' + Date_now)
 else:
-	raise ValueError("The script the script has encountered an unexpected error\nGood luck !\n" + str(Update_Answer[0] + '\n' + url_1))
+	raise ValueError("The script the script has encountered an unexpected error\nGood luck !\n" + str(Update_Answer[0] + '\n' + url_1) + ' -- ' + Date_now)
