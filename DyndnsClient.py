@@ -23,13 +23,15 @@ headers_2 = '' # headers for the ip update query
 Date_now = str(datetime.now())
 
 
-# This bloc of code is used to parse an eventual config file and check if you want to force the ip update
+# Check if you want to force the ip, the ip update or the hostname
 parser = argparse.ArgumentParser(description="A simple dyndns update client in python 3\nhttps://github.com/icefo/DyndnsClient for more infos")
 parser.add_argument("-ptc", "--Path_To_ConfigFile", help="You can call this script with a config file so specify the path here")
+parser.add_argument("-ip", "--Force_IP", help="You can override the detected ip by giving one here")
+parser.add_argument("-HN", "--Force_Hostname", help="Use this if you want to update a specific hostname")
 parser.add_argument("-F", "--Force_Ip_Update", help="Force ip update", action="store_true")
 args = parser.parse_args()
-Path_To_ConfigFile = args.Path_To_ConfigFile
 
+# This bloc of code is used to parse an eventual config file
 if args.Path_To_ConfigFile:
 	config = configparser.RawConfigParser()
 	config.optionxform = lambda option: option # option for case sensitive variable
@@ -37,6 +39,8 @@ if args.Path_To_ConfigFile:
 	for key in config['Main']:
 		globals()[key]  = config['Main'][key]
 
+if args.Force_Hostname:
+	Hostname = Force_Hostname
 
 if Use_Https:
 	http_mode = 'https://'
@@ -69,16 +73,19 @@ def HTTP_Answer_Test(HTTP_Answer,server):
 
 
 # find the host's ip
-headers_1 = {'User-Agent': User_Agent}
-for x in Whatsmyip:
-	y = HTTP_Client(x, headers_1)
-	if (y[0] and not HTTP_Answer_Test(y, x) == ""):
-		myip = HTTP_Answer_Test(y, x)
-		break
-	else:
-		print(HTTP_Answer_Test(y, x))
-		if (x == Whatsmyip[-1]):
-			raise ValueError("The script wasn't able to get a valid output from the given servers. It has therefore self-terminated" + ' -- ' + Date_now)
+if args.Force_IP:
+	myip = args.Force_IP
+else:
+	headers_1 = {'User-Agent': User_Agent}
+	for x in Whatsmyip:
+		y = HTTP_Client(x, headers_1)
+		if (y[0] and not HTTP_Answer_Test(y, x) == ""):
+			myip = HTTP_Answer_Test(y, x)
+			break
+		else:
+			print(HTTP_Answer_Test(y, x))
+			if (x == Whatsmyip[-1]):
+				raise ValueError("The script wasn't able to get a valid output from the given servers. It has therefore self-terminated" + ' -- ' + Date_now)
 
 
 #check if the ip is still the same
