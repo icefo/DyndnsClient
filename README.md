@@ -10,9 +10,9 @@ Requirements
 - ``requests``
 - ``dig``
 
-dig is a command line dns utility
+``dig`` is a command line dns utility
 
-To install requests and dig look for python3-requests and dig in your package manager
+To install ``requests`` and dig look for ``python3-requests`` and ``dig`` in your package manager
 
 Tested on ovh servers but should work with every standard dyndns server
 
@@ -21,14 +21,14 @@ Installation:
 
 I'll write an install script but if you, lost visitor, want to install this script just follow the instructions below
 
-Edit and paste the DyndnsConfig file in the /root directory
+Edit and paste the ``DyndnsConfig`` file in the `/root` directory
 
-Paste the DyndnsClient.py file in the /usr/bin directory
+Paste the ``DyndnsClient.py`` file in the `/usr/bin directory`
 
-Paste this in the /etc/crontab file: (check the ip every 10 minutes)
+Paste this in the `/etc/crontab file` : (check the ip every 10 minutes)
 
 ``*/10 * * * * root DyndnsClient.py -ptc '/root/DyndnsConfig' >> "/var/log/DyndnsClient.log" 2>> "/var/log/DyndnsClient_error.log"``
 
-Paste the DyndnsClient file in /etc/logrotate.d
+Paste the DyndnsClient file in `/etc/logrotate.d`
 
 You're done !
