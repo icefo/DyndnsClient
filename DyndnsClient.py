@@ -55,7 +55,7 @@ else:
         print() # make a newline between log entries
         sys.exit(1)
 
-myip = "7.7.7.9"
+
 
 if not args.Force_Ip_Update:
     #check if the ip is still the same
