@@ -24,6 +24,7 @@ I'll write an install script but if you, lost visitor, want to install this scri
 Edit and paste the ``DyndnsConfig`` file in the `/root` directory
 
 Paste the ``DyndnsClient.py`` file in the `/usr/bin directory`
+Type ``chmod +x /usr/bin/DyndnsClient.py`` in your terminal
 
 Paste this in the `/etc/crontab file` : (check the ip every 10 minutes)
 
