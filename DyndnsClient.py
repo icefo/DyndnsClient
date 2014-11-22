@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import requests, configparser, argparse, sys, os.path
 from datetime import datetime
 from subprocess import check_output
