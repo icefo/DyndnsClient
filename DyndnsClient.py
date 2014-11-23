@@ -6,8 +6,8 @@ from subprocess import check_output
 
 
 Username = 'your Username'
-Password = 'Your secur password'
-Host = 'www.ovh.com' # replace this with your dyndns' domain name 
+Password = 'Your secure password'
+Host = 'www.ovh.com' # replace this with your dyndns' domain provider
 Hostname = 'subdomain.domain.net' # or 'domain.net'
 User_Agent = "icefo's dyndns updater -- https://github.com/icefo/DyndnsClient" # or "Mozilla/5.0 (X11; U; Linux i686) Gecko/20071127 Firefox/2.0.0.11"
 Use_Https = True
