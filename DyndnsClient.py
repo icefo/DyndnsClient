@@ -53,7 +53,7 @@ else:
     except Exception as e:
         print("Impossible to find the ip, the script will exit with the 1 error code -- ",str(datetime.now()), file=sys.stderr)
         print(e, file=sys.stderr)
-        print() # make a newline between log entries
+        print("", file=sys.stderr) # make a newline between log entries
         sys.exit(1)
 
 
@@ -89,7 +89,7 @@ except Exception as e:
     # Can be connection timeout, connection reset by peer, no dns...
     print("Something bad happened -- "+ str(datetime.now()), file=sys.stderr)
     print(e, file=sys.stderr)
-    print() # make a newline between log entries
+    print("", file=sys.stderr) # make a newline between log entries
     sys.exit(2)
 
 # raise an exception if the server answered with and 4XX or 5XX code
@@ -98,7 +98,7 @@ try:
 except Exception as e:
     print("Http server answered to the update query with an 4xx or 5xx code, that's bad", file=sys.stderr)
     print(e, " -- ", str(datetime.now()), file=sys.stderr)
-    print() # make a newline between log entries
+    print("", file=sys.stderr) # make a newline between log entries
     sys.exit(3)
 
 if r.text.startswith('good'):
