@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
-import requests, configparser, argparse, sys, os.path
 from datetime import datetime
+
+import argparse
+import configparser
+import os.path
+import requests
+import sys
 
 Username = 'your Username'
 Password = 'Your secure password'
@@ -42,7 +47,15 @@ if args.Force_Ip:
 else:
     # find the ip with a dns query and raise an error if something goes wrong
     try:
-        myip = requests.get(http_mode + "myip.icefo.net", headers=headers).text
+        endpoint = 'https://ipinfo.io/json'
+        response = requests.get(endpoint, verify=True)
+
+        if response.status_code != 200:
+            raise ConnectionError('Status:' + str(response.status_code) + 'Problem with the request. Exiting.')
+
+        data = response.json()
+
+        myip = data['ip']
     except Exception as e:
         print("Impossible to find the ip, the script will exit with the 1 error code -- ", str(datetime.now()), file=sys.stderr)
         print(e, file=sys.stderr)
